@@ -1,0 +1,108 @@
+esphome:
+  name: espair
+  platform: ESP32
+  board: esp32doit-devkit-v1
+  includes:
+    - sm300d2.h
+
+wifi:
+  ssid: "TP-LINK_6F4134"
+  password: "01470260"
+  power_save_mode: none
+
+  ap:
+    ssid: "Test Fallback Hotspot"
+    password: "change me to a super secure password"
+
+captive_portal:
+
+logger:
+
+api:
+
+ota:
+  - platform: esphome
+    password: "fd402f642437ccfec981f670ce4c9fb0"
+
+
+uart:
+  id: uart_bus
+  data_bits: 8
+  stop_bits: 1
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 9600
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: IP Address
+      id: ip
+    ssid:
+      name: Connected SSID
+      id: ssid
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+
+  - platform: uptime
+    name: Uptime
+
+  - platform: custom
+    lambda: |-
+      auto espair_sensor = new SM300D2Sensor(id(uart_bus));
+      App.register_component(espair_sensor);
+      return {
+        espair_sensor->co2_sensor, 
+        espair_sensor->formaldehyde_sensor, 
+        espair_sensor->tvoc_sensor,
+        espair_sensor->pm2_5_sensor,
+        espair_sensor->pm10_sensor,
+        espair_sensor->temperature_sensor,
+        espair_sensor->humidity_sensor
+      };
+    sensors:
+      - name: "CO₂"
+        unit_of_measurement: "ppm"
+        accuracy_decimals: 0
+        icon: "mdi:molecule-co2"
+
+      - name: "Formaldehyde"
+        unit_of_measurement: "µg/m³"
+        accuracy_decimals: 0
+        icon: "mdi:flask"
+
+      - name: "TVOC"
+        unit_of_measurement: "µg/m³"
+        accuracy_decimals: 0
+        icon: "mdi:chemical-weapon"
+
+      - name: "PM2.5"
+        unit_of_measurement: "µg/m³"
+        accuracy_decimals: 0
+        icon: "mdi:grain"
+
+      - name: "PM10"
+        unit_of_measurement: "µg/m³"
+        accuracy_decimals: 0
+        icon: "mdi:grain"
+
+      - name: "Temperature"
+        unit_of_measurement: "°C"
+        accuracy_decimals: 1
+        icon: "mdi:thermometer"
+
+      - name: "Humidity"
+        unit_of_measurement: "%"
+        accuracy_decimals: 1
+        icon: "mdi:water-percent"
+
+# Enable the Web Server component 
+web_server:
+  port: 80
+  version: 3
+
+
+  
